@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Control Your ESP32</h1>
+    <button id="toggleButton">Toggle LED</button>
+    <p id="status"></p>
+
+    <script>
+        document.getElementById('toggleButton').onclick = async function() {
+            const response = await fetch('http://<YOUR_ESP32_IP>/toggle');
+            const data = await response.text();
+            document.getElementById('status').innerText = data;
+        };
+    </script>
+</body>
+</html>
