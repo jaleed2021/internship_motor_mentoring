@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Motor Monitoring</title>
+    <style>
+        html { font-family: monospace; display: inline-block; margin: 0 auto; text-align: center; }
+        .data { font-size: 24px; margin: 10px 0; }
+        .alert { font-size: 24px; margin: 10px 0; color: black; }
+        input { font-size: 24px; margin: 10px; }
+        @media only screen and (max-width: 600px) { .data, .alert, input { font-size: 18px; } }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ESP32 Motor Monitoring</h1>
+        <p>Monitor Motor Conditions</p>
+    </header>
+    <main>
+        <div class='data'><strong>Temperature:</strong> <span id="temperature">--</span> °C</div>
+        <div class='data'><strong>Vibration:</strong> <span id="vibration">--</span></div>
+
+        <div id="alert" class="alert"></div>
+
+        <div class='data'><strong>Current Thresholds:</strong></div>
+        <div class='data'>Normal: <span id="normalThreshold">--</span> °C</div>
+        <div class='data'>Alarming: <span id="alarmingThreshold">--</span> °C</div>
+        <div class='data'>Danger: <span id="dangerThreshold">--</span> °C</div>
+
+        <p>Set Temperature Thresholds:</p>
+        <form id="normalForm" action="/set_normal">
+            <input type="number" name="value" value="30" min="0" max="100"> Normal
+            <input type="submit" value="Set">
+        </form>
+        <form id="alarmingForm" action="/set_alarming">
+            <input type="number" name="value" value="40" min="0" max="100"> Alarming
+            <input type="submit" value="Set">
+        </form>
+        <form id="dangerForm" action="/set_danger">
+            <input type="number" name="value" value="50" min="0" max="100"> Danger
+            <input type="submit" value="Set">
+        </form>
+    </main>
+
+    <script>
+        function fetchData() {
+            fetch('/getData')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('temperature').innerText = data.temperature.toFixed(2);
+                    document.getElementById('vibration').innerText = data.vibration;
+                    document.getElementById('normalThreshold').innerText = data.normalThreshold.toFixed(2);
+                    document.getElementById('alarmingThreshold').innerText = data.alarmingThreshold.toFixed(2);
+                    document.getElementById('dangerThreshold').innerText = data.dangerThreshold.toFixed(2);
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    document.getElementById('alert').innerText = 'Error: ' + error.message;
+                });
+        }
+
+        // Prevent form submission default behavior
+        document.getElementById('normalForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            fetchData();
+        });
+        document.getElementById('alarmingForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            fetchData();
+        });
+        document.getElementById('dangerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            fetchData();
+        });
+
+        setInterval(fetchData, 5000); // Fetch data every 5 seconds
+        fetchData(); // Initial fetch
+    </script>
+</body>
+</html>
